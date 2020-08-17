@@ -103,10 +103,6 @@
       <Project>{7649ef1d-0af3-4009-8df5-d6bfb9d47bef}</Project>
       <Name>Robko01Lib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Robko01RemoteControl\Robko01RemoteControl.csproj">
-      <Project>{47a6b94c-77d5-4195-9ee0-b9622f78758d}</Project>
-      <Name>Robko01RemoteControl</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

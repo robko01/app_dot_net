@@ -29,16 +29,14 @@ using System.IO;
 using System.Net;
 using System.Drawing;
 using System.Diagnostics;
+using System.IO.Ports;
 
 using Robko01Lib;
 using Robko01Lib.Data;
 using Robko01Lib.Events;
 using Robko01Lib.Controllers;
 using Robko01Lib.Controllers.TUGAB;
-using Robko01RemoteControl;
-using Robko01RemoteControl.Events;
 using Robko01Lib.Adapters;
-using System.IO.Ports;
 using Robko01.Settings;
 
 //TODO: Delay of the motors must be done with track bars.
@@ -83,11 +81,6 @@ namespace Robko01
         /// Kinematics model of the robot.
         /// </summary>
         private Kinematics kinematics = new Kinematics();
-
-        /// <summary>
-        /// Remote controller.
-        /// </summary>
-        private RemoteController remoteController;
 
         #endregion
 
@@ -811,74 +804,6 @@ namespace Robko01
             }
         }
 
-
-        private void ConnectToRobotViaMqtt()
-        {
-            try
-            {
-                if (controllerType == ControllerTypes.None)
-                {
-                    return;
-                }
-
-                this.programControl.OnFinish += this.programControl_OnFinish;
-                this.programControl.OnRuning += this.programControl_OnRuning;
-                this.programControl.OnExecutionIndexCanged += this.programControl_OnExecutionIndexChanged;
-
-                MqttAdapter mqttQdapter = new MqttAdapter(
-                    Properties.Settings.Default.BrokerHost,
-                    Properties.Settings.Default.BrokerPort,
-                    Properties.Settings.Default.MqttInputTopic,
-                    Properties.Settings.Default.MqttOutputTopic);
-
-
-                if (this.controllerType == ControllerTypes.TUGAB)
-                {
-                    this.robot = new Robko01Lib.Controllers.TUGAB.Robko01(mqttQdapter);
-                }
-                else if (this.controllerType == ControllerTypes.VALNIKO)
-                {
-                    this.robot = new Robko01Lib.Controllers.VALNIKO.Robko01(mqttQdapter);
-                }
-                else if (this.controllerType == ControllerTypes.SVSHADY)
-                {
-                    this.robot = new Robko01Lib.Controllers.SVSHADY.Robko01(mqttQdapter);
-                }
-                else if (this.controllerType == ControllerTypes.ORLIN369)
-                {
-                    this.robot = new Robko01Lib.Controllers.ORLIN369.Robko01(mqttQdapter);
-                }
-
-                this.robot.OnMoveing += this.myRobko_OnMoveing;
-                this.robot.OnNotMoveing += this.myRobko_OnNotMoveing;
-                this.robot.OnMessage += Robot_OnMessage;
-                this.robot.Connect();
-            }
-            catch (Exception exception)
-            {
-                this.AddLogRow(exception.ToString());
-            }
-        }
-
-        private void StartRemoteServer(IPEndPoint endPoint, byte slaveAddress, ushort startAddress)
-        {
-            this.remoteController = new RemoteController(endPoint, slaveAddress); // 37300
-            this.remoteController.StartAddress = startAddress;
-            this.remoteController.MotionHandler += this.remoteController_MotionHandler;
-            this.remoteController.DriverState += this.remoteController_DriverState;
-            this.remoteController.Connect();
-        }
-
-        private void StopRemoteServer()
-        {
-            if (this.remoteController != null)
-            {
-                this.remoteController.MotionHandler -= this.remoteController_MotionHandler;
-                this.remoteController.Disconnect();
-                this.remoteController.Dispose();
-            }
-        }
-
         #endregion
 
         #region Form
@@ -906,7 +831,6 @@ namespace Robko01
         {
             this.StopProgram();
             this.DisconnectFromRobot();
-            this.StopRemoteServer();
         }
 
         #endregion
@@ -1197,8 +1121,6 @@ namespace Robko01
 
             if (isValidIP && isValidPort)
             {
-                this.StartRemoteServer(new IPEndPoint(address, port), slaveAddress, startAddress);
-
                 this.btnRCStart.Enabled = false;
                 this.btnRCStop.Enabled = true;
 
@@ -1216,8 +1138,6 @@ namespace Robko01
 
         private void btnRCStop_Click(object sender, EventArgs e)
         {
-            this.StopRemoteServer();
-
             this.btnRCStart.Enabled = true;
             this.btnRCStop.Enabled = false;
 
@@ -1365,22 +1285,6 @@ namespace Robko01
             this.lblBoardType.Text = string.Format("Board Type: {0}", this.controllerType.ToString());
         }
 
-        private void connectToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if(controllerType == ControllerTypes.None)
-            {
-                MessageBox.Show("You should select first robot controller type.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            this.ConnectToRobotViaMqtt();
-        }
-
-        private void disconnectToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.DisconnectFromRobot();
-        }
-
         private void goToGitHubToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Send the URL to the operating system.
@@ -1462,107 +1366,6 @@ namespace Robko01
         private void chkLoopProgram_CheckedChanged(object sender, EventArgs e)
         {
             this.programControl.LoopProgram = this.chkLoopProgram.Checked;
-        }
-
-        #endregion
-
-        #region Remote Control / MODBUS-TCP Server
-
-        private void remoteController_MotionHandler(object sender, MotionCommandEventArg e)
-        {
-            this.robot.SetJoint(JointName.Base, e.BaseDelay, e.BaseSteps);
-            while (this.robot.IsRuning)
-            {
-                Thread.Sleep(1);
-            }
-
-            this.robot.SetJoint(JointName.Shoulder, e.ShoulderDelay, e.ShoulderSteps);
-            while (this.robot.IsRuning)
-            {
-                Thread.Sleep(1);
-            }
-
-            this.robot.SetJoint(JointName.Elbow, e.ElbowDelay, e.ElbowSteps);
-            while (this.robot.IsRuning)
-            {
-                Thread.Sleep(1);
-            }
-
-            this.robot.SetJoint(JointName.Pitch, e.PichDelay, e.PichSteps);
-            while (this.robot.IsRuning)
-            {
-                Thread.Sleep(1);
-            }
-
-            this.robot.SetJoint(JointName.Roll, e.RollDelay, e.RollDelay);
-            while (this.robot.IsRuning)
-            {
-                Thread.Sleep(1);
-            }
-            
-            this.robot.SetJoint(JointName.Gripper, (int)e.GripperDelay, (int)e.GripperSteps);
-        }
-
-        private void remoteController_DriverState(object sender, DriverStateEventArg e)
-        {
-            if (e.Base == 1)
-            {
-                this.robot.Enable(JointName.Base);
-            }
-            else if (e.Base == 0)
-            {
-                this.robot.Enable(JointName.Base);
-            }
-            Thread.Sleep(700);
-
-            if (e.Shoulder == 1)
-            {
-                this.robot.Enable(JointName.Shoulder);
-            }
-            else if (e.Shoulder == 0)
-            {
-                this.robot.Enable(JointName.Shoulder);
-            }
-            Thread.Sleep(700);
-
-            if (e.Elbow == 1)
-            {
-                this.robot.Enable(JointName.Elbow);
-            }
-            else if (e.Elbow == 0)
-            {
-                this.robot.Enable(JointName.Elbow);
-            }
-            Thread.Sleep(700);
-
-            if (e.Pitch == 1)
-            {
-                this.robot.Enable(JointName.Pitch);
-            }
-            else if (e.Pitch == 0)
-            {
-                this.robot.Enable(JointName.Pitch);
-            }
-            Thread.Sleep(700);
-
-            if (e.Roll == 1)
-            {
-                this.robot.Enable(JointName.Roll);
-            }
-            else if (e.Roll == 0)
-            {
-                this.robot.Enable(JointName.Roll);
-            }
-            Thread.Sleep(700);
-
-            if (e.Gripper == 1)
-            {
-                this.robot.Enable(JointName.Gripper);
-            }
-            else if (e.Gripper == 0)
-            {
-                this.robot.Enable(JointName.Gripper);
-            }
         }
 
         #endregion
