@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7649EF1D-0AF3-4009-8DF5-D6BFB9D47BEF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Robko01Lib</RootNamespace>
+    <AssemblyName>Robko01Lib</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="M2Mqtt.Net, Version=4.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\M2Mqtt.4.3.0.0\lib\net45\M2Mqtt.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Adapters\Adapter.cs" />
+    <Compile Include="Adapters\MqttAdapter.cs" />
+    <Compile Include="Adapters\SerialAdapter.cs" />
+    <Compile Include="Controllers\ControllerTypes.cs" />
+    <Compile Include="Controllers\ORLIN369\FrameType.cs" />
+    <Compile Include="Controllers\ORLIN369\FunctionCodes.cs" />
+    <Compile Include="Controllers\ORLIN369\JointDirection.cs" />
+    <Compile Include="Controllers\ORLIN369\Robko01.cs" />
+    <Compile Include="Controllers\RobotDevice.cs" />
+    <Compile Include="Controllers\SVSHADY\Robko01.cs" />
+    <Compile Include="Controllers\TUGAB\JointDirection.cs" />
+    <Compile Include="Controllers\TUGAB\JointState.cs" />
+    <Compile Include="Controllers\TUGAB\ResponseKeys.cs" />
+    <Compile Include="Controllers\TUGAB\Robko01.cs" />
+    <Compile Include="Controllers\VALNIKO\FunctionRegisters.cs" />
+    <Compile Include="Controllers\VALNIKO\JointDirection.cs" />
+    <Compile Include="Controllers\VALNIKO\Robko01.cs" />
+    <Compile Include="Controllers\VALNIKO\StepMode.cs" />
+    <Compile Include="Data\CommandsStore.cs" />
+    <Compile Include="Data\JointName.cs" />
+    <Compile Include="Data\MotionCommand.cs" />
+    <Compile Include="Data\MotionCommands.cs" />
+    <Compile Include="Events\EventArgsInt.cs" />
+    <Compile Include="Events\EventArgsString.cs" />
+    <Compile Include="Kinematics.cs" />
+    <Compile Include="ProgramController.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
